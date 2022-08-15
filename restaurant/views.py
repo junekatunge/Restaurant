@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.utils.timezone import datetime
 from django.views import View
-from customer.models import OrderModel
+from Customer.models import OrderModel
 
 # Create your views here.
 class Dashboard(LoginRequiredMixin,UserPassesTestMixin,View):

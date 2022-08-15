@@ -94,7 +94,7 @@ class Order(View):
             'price': price
         }
         # return render(request, 'order_confirmation.html', context)
-        return redirect('order-confirmation', pk=order.pk)
+        return render(request,'order_confirmation.html', context)
     
 class OrderConfirmation(View):
     def get(self,request,pk, *args, **kwargs):
@@ -105,11 +105,14 @@ class OrderConfirmation(View):
             'items' : order.items,
             'price' : order.price    
         }
-        
+    
         return render(request,'order_confirmation.html',context)
     
     def post(self,request,pk,*args, **kwargs):
+        order = OrderModel.objects.get(pk=pk)
         print(request.body)
+        
+        return redirect('order-confirmation', pk=order.pk)
         
 class OrderPayConfirmation(View):
     def get(self,request,*args, **kwargs):
