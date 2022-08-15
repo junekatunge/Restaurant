@@ -1,0 +1,22 @@
+<script src="https://www.paypal.com/sdk/js?client-id=API_KEY&currency=USD"></script>
+<script> 
+  // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '{{ price }}'
+                        }
+                    }]
+                });
+            },
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Make post request to pay confirmation
+                });
+            }
+        }).render('#paypal-button-container');
+</script>
