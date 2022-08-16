@@ -6,6 +6,7 @@ from .models import *
 from django.views.generic import View
 # from django.conf import settings
 from django.core.mail import send_mail
+import json
 
 
 # Create your views here.
@@ -39,9 +40,6 @@ class Order(View):
         state= request.POST.get('state')
         zip_code=request.POST.get('zip')
         
-        
-        
-        
         #a customer orders items from the Menu which arre placed in an empty list called items
         order_items = {
             'items': []
@@ -59,8 +57,9 @@ class Order(View):
             order_items['items'].append(item_data)
         #  to get each price and id.   
         #to calculate the total price, we need each id to add it as a relationship to our order object that we are about to create.
-        price = 0
-        item_ids = []
+            price = 0
+            item_ids = []
+            
         for item in order_items['items']:
             price += item['price']
             item_ids.append(item['id'])
@@ -81,20 +80,19 @@ class Order(View):
         body = ('Hello, thank you so much for your order, your food is being prepared and it will be delivered soon \n'f'Your total:{price}\n')
         
         send_mail(
-            'Thank you for your order',
+            'Thank you for your Order',
             body,
             'june@gmail.com',
             [email],
             fail_silently=False
         )
         
-
         context = {
             'items': order_items['items'],
             'price': price
         }
         # return render(request, 'order_confirmation.html', context)
-        return render(request,'order_confirmation.html', context)
+        return redirect('order-confirmation',pk=order.pk)
     
 class OrderConfirmation(View):
     def get(self,request,pk, *args, **kwargs):
@@ -109,10 +107,14 @@ class OrderConfirmation(View):
         return render(request,'order_confirmation.html',context)
     
     def post(self,request,pk,*args, **kwargs):
-        order = OrderModel.objects.get(pk=pk)
-        print(request.body)
+        data = json.loads(request.body)
+
+        if data['isPaid']:
+            order = OrderModel.objects.get(pk=pk)
+            order.is_paid = True
+            order.save()#save the is_paid object in the db
         
-        return redirect('order-confirmation', pk=order.pk)
+        return redirect('payment-confirmation')
         
 class OrderPayConfirmation(View):
     def get(self,request,*args, **kwargs):
