@@ -2,6 +2,7 @@ from functools import total_ordering
 from multiprocessing import context
 from unicodedata import category
 from django.shortcuts import render,redirect
+from django.db.models import Q #to filter the query easier
 from .models import *
 from django.views.generic import View
 # from django.conf import settings
@@ -16,6 +17,33 @@ class Index(View):
 class About(View):    
     def get(self, request, *args, **kwargs):
         return render(request, 'about.html')
+class Menu(View):
+    def get(self, request, *args, **kwargs):
+        menu_items = MenuItem.objects.all()
+
+        context = {
+            'menu_items': menu_items
+        }
+
+        return render(request, 'menu.html', context)
+
+
+class MenuSearch(View):
+    def get(self, request, *args, **kwargs):
+        query = self.request.GET.get("q")#get the query
+
+        menu_items = MenuItem.objects.filter(
+            Q(name__icontains=query) | #or
+            Q(price__icontains=query) | #or
+            Q(description__icontains=query)
+        )
+
+        context = {
+            'menu_items': menu_items
+        }
+
+        return render(request, 'menu.html', context)
+    
 class Order(View):
     def get(self,request,*args, **kwargs):
         appetizers = MenuItem.objects.filter(category__name__contains='Appetizer')
@@ -91,10 +119,10 @@ class Order(View):
             'items': order_items['items'],
             'price': price
         }
-        # return render(request, 'order_confirmation.html', context)
+        # to redirect to the url
         return redirect('order-confirmation',pk=order.pk)
     
-class OrderConfirmation(View):
+class OrderConfirmation(View):#to deisplay the order page
     def get(self,request,pk, *args, **kwargs):
         order = OrderModel.objects.get(pk=pk)#get what the user ordered
         
@@ -107,16 +135,16 @@ class OrderConfirmation(View):
         return render(request,'order_confirmation.html',context)
     
     def post(self,request,pk,*args, **kwargs):
-        data = json.loads(request.body)
+        data = json.loads(request.body)#to convert data so that it can be used in python
 
         if data['isPaid']:
             order = OrderModel.objects.get(pk=pk)
             order.is_paid = True
             order.save()#save the is_paid object in the db
         
-        return redirect('payment-confirmation')
+        return redirect('payment-confirmation')#to redirect to the url
         
-class OrderPayConfirmation(View):
+class OrderPayConfirmation(View):#to display the payement submitted page
     def get(self,request,*args, **kwargs):
         return render(request,'order_pay_confirmation.html')
     
