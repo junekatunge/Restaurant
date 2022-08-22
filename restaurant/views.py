@@ -4,6 +4,7 @@ from django.utils.timezone import datetime
 from django.views import View
 from Customer.models import OrderModel
 
+
 # Create your views here.
 class Dashboard(LoginRequiredMixin,UserPassesTestMixin,View):
     def get(self,request,*args, **kwargs):
@@ -18,7 +19,7 @@ class Dashboard(LoginRequiredMixin,UserPassesTestMixin,View):
             'total_revenue' : total_revenue,
             'total_orders' : len(orders)
         }
-        return render (request,'dashboard.html',context)
+        return render (request,'restaurant/dashboard.html',context)
     # checks if the user has the staff group if it exisys it returns true if not error 403 is returned
     def test_func(self):
         return self.request.user.groups.filter(name ='Staff').exists()
